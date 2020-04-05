@@ -14,54 +14,57 @@ let client = new MongoClient(uri, { useNewUrlParser: true });
 
 const foods = ["breakfast", "lunch", "dinner"];
 
+app.get("/food", (req, res) => {
+  client = new MongoClient(uri, { useNewUrlParser: true });
 
-
-app.get("/foods", (req, res) => {
-
-    client = new MongoClient(uri, { useNewUrlParser: true });
-
-    client.connect((err) => {
-
-
-        const collection = client.db("redOnionStore").collection("foods");
-        collection.find().toArray((err, documents) => {
-          if(err){
-              console.log(err);
-              res.status(500).send({message:err});
-          } else{
-            res.send(documents);
-          }
-          
-        });
-        client.close();
-      });
-
-  
+  client.connect((err) => {
+    const collection = client.db("redOnionStore").collection("foods");
+    collection.find().toArray((err, documents) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        res.send(documents);
+      }
+    });
+    client.close();
+  });
 });
 
-app.get("/foods/:id", (req, res) => {
-  const id = request.params.id;
-  const foodType = foods[id];
-  response.send({ id, foodType });
+app.get("/food/:key", (req, res) => {
+  const key = req.params.key;
+
+  client = new MongoClient(uri, { useNewUrlParser: true });
+
+  client.connect((err) => {
+    const collection = client.db("redOnionStore").collection("foods");
+    collection.find({ key }).toArray((err, documents) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        res.send(documents[0]);
+      }
+    });
+    client.close();
+  });
 });
 
 //Post
 
 app.post("/addFood", (req, res) => {
-
   const food = req.body;
   client = new MongoClient(uri, { useNewUrlParser: true });
 
   client.connect((err) => {
     const collection = client.db("redOnionStore").collection("foods");
     collection.insert(food, (err, result) => {
-      if(err){
-          console.log(err);
-          res.status(500).send({message:err});
-      } else{
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
         res.send(result.ops[0]);
       }
-      
     });
     client.close();
   });
